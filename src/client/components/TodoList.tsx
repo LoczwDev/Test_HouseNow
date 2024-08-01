@@ -81,7 +81,19 @@ export const TodoList = () => {
       apiContext.todo.getAll.refetch()
     },
   })
-  
+
+  const handleDelete = (todoId: number) => {
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== todoId))
+    deleteTodo({
+      id: todoId,
+    })
+  }
+
+  const { mutate: deleteTodo } = api.todo.delete.useMutation({
+    onSuccess: () => {
+      apiContext.todo.getAll.refetch()
+    },
+  })
 
   const handleCheckboxChange = (todoId: number, isChecked: boolean) => {
     setTodos((prevTodos: any) =>
@@ -102,31 +114,42 @@ export const TodoList = () => {
       {todos.map((todo: any) => (
         <li key={todo.id}>
           <div
-            className={`flex items-center rounded-12 border border-gray-200 px-4 py-3 shadow-sm ${
+            className={`flex w-full items-center justify-between rounded-12 border border-gray-200 px-4 py-3 shadow-sm ${
               todo.status === 'completed' ? 'bg-[#F8FAFC]' : ''
             }`}
           >
-            <Checkbox.Root
-              id={String(todo.id)}
-              checked={todo.status === 'completed'}
-              onCheckedChange={(checked) =>
-                handleCheckboxChange(todo.id, checked === true)
-              }
-              className="flex h-6 w-6 items-center justify-center rounded-6 border border-gray-300 focus:border-gray-700 focus:outline-none data-[state=checked]:border-gray-700 data-[state=checked]:bg-gray-700"
-            >
-              <Checkbox.Indicator>
-                <CheckIcon className="h-4 w-4 text-white" />
-              </Checkbox.Indicator>
-            </Checkbox.Root>
+            <div className="flex items-center">
+              <Checkbox.Root
+                id={String(todo.id)}
+                checked={todo.status === 'completed'}
+                onCheckedChange={(checked) =>
+                  handleCheckboxChange(todo.id, checked === true)
+                }
+                className="flex h-6 w-6 items-center justify-center rounded-6 border border-gray-300 focus:border-gray-700 focus:outline-none data-[state=checked]:border-gray-700 data-[state=checked]:bg-gray-700"
+              >
+                <Checkbox.Indicator>
+                  <CheckIcon className="h-4 w-4 text-white" />
+                </Checkbox.Indicator>
+              </Checkbox.Root>
 
-            <label
-              className={`block pl-3 font-medium ${
-                todo.status === 'completed' ? 'text-gray-500 line-through' : ''
-              }`}
-              htmlFor={String(todo.id)}
+              <label
+                className={`block pl-3 font-medium ${
+                  todo.status === 'completed'
+                    ? 'text-gray-500 line-through'
+                    : ''
+                }`}
+                htmlFor={String(todo.id)}
+              >
+                {todo.body}
+              </label>
+            </div>
+            <button
+              onClick={() => handleDelete(todo.id)}
+              aria-label="Delete todo"
+              className="ml-4 p-1 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
             >
-              {todo.body}
-            </label>
+              <XMarkIcon className="h-5 w-5" />
+            </button>
           </div>
         </li>
       ))}
