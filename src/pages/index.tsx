@@ -1,5 +1,6 @@
 import { CreateTodoForm } from '@/client/components/CreateTodoForm'
 import { TodoList } from '@/client/components/TodoList'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs'
 
 /**
  * QUESTION 6:
@@ -25,7 +26,32 @@ const Index = () => {
         </h1>
 
         <div className="pt-10">
-          <TodoList />
+          <Tabs defaultValue="all">
+            <TabsList className="flex items-center gap-3">
+              {['all', 'pending', 'completed'].map((status) => (
+                <TabsTrigger
+                  key={status}
+                  value={status}
+                  className={`rounded-full border border-gray-200 px-6 py-2 text-sm font-bold text-gray-700 ${`data-[state=active]:bg-gray-700 data-[state=active]:text-white`} hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {['all', 'pending', 'completed'].map((status) => (
+              <TabsContent
+                key={status}
+                value={status as 'all' | 'pending' | 'completed'}
+              >
+                <div className="pt-10">
+                  <TodoList
+                    statusFilter={status as 'all' | 'pending' | 'completed'}
+                  />
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
         </div>
 
         <div className="pt-10">

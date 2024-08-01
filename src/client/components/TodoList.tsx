@@ -65,7 +65,11 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
  *  - https://auto-animate.formkit.com
  */
 
-export const TodoList = () => {
+interface TodoListProps {
+  statusFilter: 'all' | 'pending' | 'completed'
+}
+
+export const TodoList = ({ statusFilter }: TodoListProps) => {
   const { data: todosFromApi = [] } = api.todo.getAll.useQuery({
     statuses: ['completed', 'pending'],
   })
@@ -97,6 +101,10 @@ export const TodoList = () => {
     },
   })
 
+  const filteredTodos = todos.filter(
+    (todo: any) => statusFilter === 'all' || todo.status === statusFilter
+  )
+
   const handleCheckboxChange = (todoId: number, isChecked: boolean) => {
     setTodos((prevTodos: any) =>
       prevTodos.map((todo: any) =>
@@ -115,7 +123,7 @@ export const TodoList = () => {
 
   return (
     <ul ref={parent} className="grid grid-cols-1 gap-y-3">
-      {todos.map((todo: any) => (
+      {filteredTodos.map((todo: any) => (
         <li key={todo.id}>
           <div
             className={`flex w-full items-center justify-between rounded-12 border border-gray-200 px-4 py-3 shadow-sm ${
