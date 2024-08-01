@@ -1,4 +1,4 @@
-import type { SVGProps } from 'react'
+import { useEffect, useState, type SVGProps } from 'react'
 
 import * as Checkbox from '@radix-ui/react-checkbox'
 
@@ -64,17 +64,54 @@ import { api } from '@/utils/client/api'
  */
 
 export const TodoList = () => {
-  const { data: todos = [] } = api.todo.getAll.useQuery({
+  const { data: todosFromApi = [] } = api.todo.getAll.useQuery({
     statuses: ['completed', 'pending'],
   })
 
+  const [todos, setTodos] = useState(todosFromApi)
+
+  useEffect(() => {
+    setTodos(todosFromApi)
+  }, [todosFromApi])
+
+  const apiContext = api.useContext()
+
+  const { mutate: updateTodoStatus } = api.todoStatus.update.useMutation({
+    onSuccess: () => {
+      apiContext.todo.getAll.refetch()
+    },
+  })
+  
+
+  const handleCheckboxChange = (todoId: number, isChecked: boolean) => {
+    setTodos((prevTodos: any) =>
+      prevTodos.map((todo: any) =>
+        todo.id === todoId
+          ? { ...todo, status: isChecked ? 'completed' : 'pending' }
+          : todo
+      )
+    )
+    updateTodoStatus({
+      todoId: todoId,
+      status: isChecked ? 'completed' : 'pending',
+    })
+  }
+
   return (
     <ul className="grid grid-cols-1 gap-y-3">
-      {todos.map((todo) => (
+      {todos.map((todo: any) => (
         <li key={todo.id}>
-          <div className="flex items-center rounded-12 border border-gray-200 px-4 py-3 shadow-sm">
+          <div
+            className={`flex items-center rounded-12 border border-gray-200 px-4 py-3 shadow-sm ${
+              todo.status === 'completed' ? 'bg-[#F8FAFC]' : ''
+            }`}
+          >
             <Checkbox.Root
               id={String(todo.id)}
+              checked={todo.status === 'completed'}
+              onCheckedChange={(checked) =>
+                handleCheckboxChange(todo.id, checked === true)
+              }
               className="flex h-6 w-6 items-center justify-center rounded-6 border border-gray-300 focus:border-gray-700 focus:outline-none data-[state=checked]:border-gray-700 data-[state=checked]:bg-gray-700"
             >
               <Checkbox.Indicator>
@@ -82,7 +119,12 @@ export const TodoList = () => {
               </Checkbox.Indicator>
             </Checkbox.Root>
 
-            <label className="block pl-3 font-medium" htmlFor={String(todo.id)}>
+            <label
+              className={`block pl-3 font-medium ${
+                todo.status === 'completed' ? 'text-gray-500 line-through' : ''
+              }`}
+              htmlFor={String(todo.id)}
+            >
               {todo.body}
             </label>
           </div>
