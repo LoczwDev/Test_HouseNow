@@ -4,6 +4,8 @@ import * as Checkbox from '@radix-ui/react-checkbox'
 
 import { api } from '@/utils/client/api'
 
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+
 /**
  * QUESTION 3:
  * -----------
@@ -109,8 +111,10 @@ export const TodoList = () => {
     })
   }
 
+  const [parent] = useAutoAnimate<HTMLUListElement>()
+
   return (
-    <ul className="grid grid-cols-1 gap-y-3">
+    <ul ref={parent} className="grid grid-cols-1 gap-y-3">
       {todos.map((todo: any) => (
         <li key={todo.id}>
           <div
